@@ -23,23 +23,38 @@
                 </div>
             </div>
 
-            <div id="recent-cities">
-                <h3>Recent Cities</h3>
+            <div class="card bg-color-light mt-4" id="recent-cities">
+                <h3 class="card-header text-uppercase bg-secondary text-light">Recent Cities</h3>
             </div>
         </div>
 
-        <div>
-            <div>
-                <h3>Today's Forecast</h3>
-                <div>
-                    <div>
-                        <h4>
-                            <span>City Name</span>
+        <div class="col-12 col-md-9 city-forecast hide">
+            <div class="card bg-color-light mt-4 mt-md-0">
+                <h3 class="card-header text-uppercase bg-secondary text-light">Today's Forecast</h3>
+                <div class="container">
+                    <div class="row">
+                        <h4 class="ml-2">
+                            <span class="align-middle" id="city-name">City Name</span>
                         </h4>
                     </div>
-                    
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <p class="pl-3">Current Temperature: <span id="current-temp"></span></p>
+                            <p class="pl-3">Feels Like: <span id="current-feels-like"></span></p>
+                            <p class="pl-3">Condition: <span id="current-condition"></span></p>
+                            <p class="pl-3">Humidity: <span id="current-humidity"></span></p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <p class="pl-3">High: <span id="current-high"></span></p>
+                            <p class="pl-3">Low: <span id="current-low"></span></p>
+                            <p class="pl-3">Wind Speed: <span id="current-wind-speed"></span></p>
+                            <p class="pl-3">UV Index: <span id="current-uvi"></span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            
         </div>
     </main>
     
