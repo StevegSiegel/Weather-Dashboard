@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css"/>
+</head>
+<body>
+    <header class="bg-dark text-light p-3">
+        <h1>Weather Dashboard</h1>
+    </header>
+
+    <main class="row p-3 p-md-5">
+        <div class="col-12 col-md-3">
+            <div class="card bg-color-light">
+                <h3 class="card-header text-uppercase bg-secondary text-light">Search for a City</h3>
+                <div class="input-group m-4" id="city-form">
+                    <input type="text" class="form-input input-group-text col-9 mr-2" id="city-input" name="city"/>
+                    <button type="button" class="btn btn-info" id="search-btn"></button>
+                </div>
+            </div>
+
+            <div id="recent-cities">
+                <h3>Recent Cities</h3>
+            </div>
+        </div>
+
+        <div>
+            <div>
+                <h3>Today's Forecast</h3>
+                <div>
+                    <div>
+                        <h4>
+                            <span>City Name</span>
+                        </h4>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </main>
+    
+</body>
+</html>
