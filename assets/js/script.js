@@ -8,7 +8,7 @@ let formHandler = function(event) {
     
     let selectedCity = cityInput.value.trim().toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
 
-    if(selectedCity) {
+    if (selectedCity) {
         getCoords(selectedCity);
         cityInput.value = '';
     } else {
@@ -19,9 +19,9 @@ let formHandler = function(event) {
 let getCoords = function(city) {
     let currentWeatherApi = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${key}`;
 
-    fetch(currentWeatherApi).then(function(res) {
-        if (res.ok) {
-            res.json().then(function(data) {
+    fetch(currentWeatherApi).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
                 let lon = data.coord['lon'];
                 let lat = data.coord['lat'];
                 getCityForecast(city, lon, lat);
@@ -42,18 +42,149 @@ let getCoords = function(city) {
 };
 
 let getCityForecast = function(city, lon, lat) {
-    let callApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=impiral&exclude=minutely,hourly,alerts&appid=${key}`;
+    let callApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${key}`;
     
-    fetch(callApi).then(function(res) {
-        if (res.ok) {
-            res.json().then(function(data) {
+    fetch(callApi).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
 
                 cityNameEl.textContent = `${city} (${moment().format("M/D/YYYY")})`;
                 console.log(data)
                 currentForecast(data);
-                fifeDayForecast(data);
+                fiveDayForecast(data);
             });
         }
     })
 };
 
+
+let displayTemp = function(element, temperature) {
+    let tempEl = document.querySelector(element);
+    let elementText = Math.round(temperature);
+    tempEl.textContent = elementText;
+}
+
+let currentForecast = function(forecast) {
+
+    let forecastEl = document.querySelector('.city-forecast');
+    forecastEl.classList.remove('hide');
+
+    let weatherIconEl = document.querySelector('#today-icon');
+    let currentIcon = forecast.current.weather[0].icon;
+    weatherIconEl.setAttribute('src', `http://openweathermap.org/img/wn/${currentIcon}.png`);
+    weatherIconEl.setAttribute('alt', forecast.current.weather[0].main)
+
+    displayTemp('#current-temp', forecast.current['temp']);
+    displayTemp('#current-feels-like', forecast.current['feels_like']);
+    displayTemp('#current-high', forecast.daily[0].temp.max);
+    displayTemp('#current-low', forecast.daily[0].temp.min);
+
+    let currentConditionEl = document.querySelector('#current-condition');
+    currentConditionEl.textContent = forecast.current.weather[0].description.split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+
+    let currentHumidityEl = document.querySelector('#current-humidity');
+    currentHumidityEl.textContent = forecast.current['humidity'];
+
+    let currentWindEl = document.querySelector('#current-wind-speed');
+    currentWindEl.textContent = forecast.current['wind_speed'];
+
+    let uviEl = document.querySelector('#current-uvi')
+    let currentUvi = forecast.current['uvi'];
+    uviEl.textContent = currentUvi;
+
+    switch (true) {
+        case (currentUvi <= 2):
+            uviEl.className = 'badge badge-success';
+            break;
+        case (currentUvi <= 5):
+            uviEl.className = 'badge badge-warning';
+            break;
+        case (currentUvi <= 7):
+            uviEl.className = 'badge badge-danger';
+            break;
+        default:
+            uviEl.className = 'badge text-light';
+            uviEl.setAttribute('style', 'backgroud-color: blue');
+    }
+};
+
+
+let fiveDayForecast = function(forecast) {
+
+    for (let i = 1; i < 6; i++) {
+        let dates = document.querySelector('#date-' + i);
+        dates.textContent = moment().add(i, 'days').format('M/D/YYYY');
+
+        let iconImg = document.querySelector('#icon-' + i);
+        let iconCode = forecast.daily[i].weather[0].icon;
+        iconImg.setAttribute('src', `http://openweathermap.org/img/wn/${iconCode}.png`);
+        iconImg.setAttribute('alt', forecast.daily[i].weather[0].main);
+
+        displayTemp('#temp-' + i, forecast.daily[i].temp.day);
+        displayTemp('#high-' + i, forecast.daily[i].temp.max);
+        displayTemp('#low-' + i, forecast.daily[i].temp.min);
+
+        let humiditySpan = document.querySelector('#humidity-' + i);
+        humiditySpan.textContent = forecast.daily[i].humidity; 
+    }
+};
+
+
+let saveCity = function(city) {
+
+    for (let i = 0; i < cityArr.length; i++) {
+        if (city === cityArr[i]) {
+            cityArr.splice(i, 1);
+        }
+    }
+    
+    cityArr.push(city);
+    localStorage.setItem('cities', JSON.stringify(cityArr));
+};
+
+
+let loadCities = function() {
+    cityArr = JSON.parse(localStorage.getItem('cities'));
+
+    if (!cityArr) {
+        cityArr = [];
+        return false;
+    } else if (cityArr.length > 5) {
+        cityArr.shift();
+    }
+
+    let recentCities = document.querySelector('#recent-cities');
+    let cityListUl = document.createElement('ul');
+    cityListUl.className = 'list-group list-group-flush city-list';
+    recentCities.appendChild(cityListUl);
+
+    for (let i = 0; i < cityArr.length; i++) {
+        let cityListItem = document.createElement('button');
+        cityListItem.setAttribute('type', 'button');
+        cityListItem.className = 'list-group-item';
+        cityListItem.setAttribute('value', cityArr[i]);
+        cityListItem.textContent = cityArr[i];
+        cityListUl.prepend(cityListItem);
+    }
+
+    let cityList = document.querySelector('.city-list');
+    cityList.addEventListener('click', selectRecent)
+}
+
+
+let selectRecent = function(event) {
+    let chosenCity = event.target.getAttribute('value');
+
+    getCoords(chosenCity);
+}
+
+loadCities();
+cityBtn.addEventListener('click', formHandler)
+
+
+cityInput.addEventListener('keyup', function(event) {
+    if (event.keyCode === 13) {
+        cityBtn.click();
+    }
+
+});
