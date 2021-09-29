@@ -4,8 +4,8 @@ let cityNameEl = document.querySelector('#city-name');
 let cityArr = [];
 let key = 'f1ba334870977058f24f9c6bdabe3420';
 
-let formHandler = function(event) {
-    
+let formHandler = function (event) {
+
     let selectedCity = cityInput.value.trim().toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
 
     if (selectedCity) {
@@ -16,16 +16,18 @@ let formHandler = function(event) {
     };
 };
 
-let getCoords = function(city) {
+// uses open weather api to get longitude and latitude for cities //
+let getCoords = function (city) {
     let currentWeatherApi = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${key}`;
 
-    fetch(currentWeatherApi).then(function(response) {
+    fetch(currentWeatherApi).then(function (response) {
         if (response.ok) {
-            response.json().then(function(data) {
+            response.json().then(function (data) {
                 let lon = data.coord['lon'];
                 let lat = data.coord['lat'];
                 getCityForecast(city, lon, lat);
 
+                // saves searched city 
                 if (document.querySelector('.city-list')) {
                     document.querySelector('.city-list').remove();
                 }
@@ -36,18 +38,20 @@ let getCoords = function(city) {
             alert(`error: ${response.statusText}`);
         }
     })
-    .catch(function(error) {
-        alert('cannot load weather');
-    })
+        .catch(function (error) {
+            alert('cannot load weather');
+        })
 };
 
-let getCityForecast = function(city, lon, lat) {
+// uses longitude and latitude to get 5 day forcast
+let getCityForecast = function (city, lon, lat) {
     let callApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${key}`;
-    
-    fetch(callApi).then(function(response) {
-        if (response.ok) {
-            response.json().then(function(data) {
 
+    fetch(callApi).then(function (response) {
+        if (response.ok) {
+            response.json().then(function (data) {
+
+                // id's city name in forecast
                 cityNameEl.textContent = `${city} (${moment().format("M/D/YYYY")})`;
                 console.log(data)
                 currentForecast(data);
@@ -57,14 +61,15 @@ let getCityForecast = function(city, lon, lat) {
     })
 };
 
-
-let displayTemp = function(element, temperature) {
+// helper function to select correct html element and display rounded temp
+let displayTemp = function (element, temperature) {
     let tempEl = document.querySelector(element);
     let elementText = Math.round(temperature);
     tempEl.textContent = elementText;
 }
 
-let currentForecast = function(forecast) {
+// displays current forecast
+let currentForecast = function (forecast) {
 
     let forecastEl = document.querySelector('.city-forecast');
     forecastEl.classList.remove('hide');
@@ -92,6 +97,7 @@ let currentForecast = function(forecast) {
     let currentUvi = forecast.current['uvi'];
     uviEl.textContent = currentUvi;
 
+    // changes color for the uv index
     switch (true) {
         case (currentUvi <= 2):
             uviEl.className = 'badge badge-success';
@@ -109,7 +115,8 @@ let currentForecast = function(forecast) {
 };
 
 
-let fiveDayForecast = function(forecast) {
+// display 5 day forecast
+let fiveDayForecast = function (forecast) {
 
     for (let i = 1; i < 6; i++) {
         let dates = document.querySelector('#date-' + i);
@@ -125,27 +132,29 @@ let fiveDayForecast = function(forecast) {
         displayTemp('#low-' + i, forecast.daily[i].temp.min);
 
         let humiditySpan = document.querySelector('#humidity-' + i);
-        humiditySpan.textContent = forecast.daily[i].humidity; 
+        humiditySpan.textContent = forecast.daily[i].humidity;
     }
 };
 
+// saves searched cities to local storage
+let saveCity = function (city) {
 
-let saveCity = function(city) {
-
+    // prevents duplicate city from being saved, moves it to the end of array
     for (let i = 0; i < cityArr.length; i++) {
         if (city === cityArr[i]) {
             cityArr.splice(i, 1);
         }
     }
-    
+
     cityArr.push(city);
     localStorage.setItem('cities', JSON.stringify(cityArr));
 };
 
-
-let loadCities = function() {
+// loads cities from local storage 
+let loadCities = function () {
     cityArr = JSON.parse(localStorage.getItem('cities'));
 
+    // saves only the 5 most recent searches
     if (!cityArr) {
         cityArr = [];
         return false;
@@ -172,7 +181,7 @@ let loadCities = function() {
 }
 
 
-let selectRecent = function(event) {
+let selectRecent = function (event) {
     let chosenCity = event.target.getAttribute('value');
 
     getCoords(chosenCity);
@@ -181,8 +190,8 @@ let selectRecent = function(event) {
 loadCities();
 cityBtn.addEventListener('click', formHandler)
 
-
-cityInput.addEventListener('keyup', function(event) {
+// can use the enter button to 'click' the search button
+cityInput.addEventListener('keyup', function (event) {
     if (event.keyCode === 13) {
         cityBtn.click();
     }
